@@ -1,0 +1,353 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+
+body {
+
+    font-family:
+        "Yu Gothic",
+        "Meiryo",
+        sans-serif;
+
+    background: #111;
+
+    color: white;
+
+    min-height: 100vh;
+
+    padding: 25px 15px;
+
+}
+
+
+header {
+
+    text-align: center;
+
+    margin-bottom: 25px;
+
+}
+
+
+header h1 {
+
+    font-size: 38px;
+
+    margin-bottom: 8px;
+
+}
+
+
+header p {
+
+    color: #aaa;
+
+    font-size: 16px;
+
+}
+
+
+main {
+
+    width: 100%;
+
+    max-width: 500px;
+
+    margin: auto;
+
+    text-align: center;
+
+}
+
+
+/* 日付 */
+
+#daySelect {
+    display: flex;
+    justify-content: center;
+    gap: 35px;
+    width: 300px;
+    max-width: 90vw;
+
+    background: #1d1d1d;
+    border: 1px solid #333;
+    border-radius: 15px;
+    padding: 15px;
+    margin: 0 auto 20px;
+}
+
+
+#daySelect label {
+
+    font-size: 18px;
+
+    cursor: pointer;
+
+}
+
+
+#daySelect input {
+
+    transform: scale(1.2);
+
+    margin-right: 7px;
+
+}
+
+
+/* ボタン */
+button {
+    display: block;
+
+    width: 340px;
+    max-width: 90vw;
+
+    border: none;
+    border-radius: 15px;
+
+    padding: 14px 20px;
+
+    margin: 12px auto 0;
+
+    font-size: 18px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.15s;
+}
+
+
+button:hover {
+
+    transform: scale(1.02);
+
+}
+
+
+/* 開始 */
+
+#startBtn {
+
+    background: white;
+
+    color: #111;
+
+}
+
+
+/* QR */
+
+#reader {
+
+    display: none;
+
+    width: 100%;
+
+    max-width: 400px;
+
+    aspect-ratio: 1 / 1;
+
+    margin: 20px auto;
+
+    background: black;
+
+    border-radius: 20px;
+
+    overflow: hidden;
+
+}
+
+
+#reader video {
+
+    width: 100% !important;
+
+    height: 100% !important;
+
+    object-fit: cover;
+
+}
+
+
+#reader canvas {
+
+    width: 100% !important;
+
+    height: 100% !important;
+
+}
+
+
+/* カメラ停止 */
+
+#stopBtn {
+
+    display: none;
+
+    background: #555;
+
+    color: white;
+
+}
+
+
+/* 結果 */
+
+#result {
+
+    display: none;
+
+    margin-top: 20px;
+
+    padding: 30px 20px;
+
+    border-radius: 20px;
+
+    background: #1d1d1d;
+
+    border: 2px solid #333;
+
+}
+
+
+/* チケット番号 */
+
+.ticket-number {
+
+    font-size: 55px;
+
+    font-weight: bold;
+
+    margin-bottom: 12px;
+
+}
+
+
+/* 結果タイトル */
+
+.result-title {
+
+    font-size: 32px;
+
+    font-weight: bold;
+
+    margin-bottom: 8px;
+
+}
+
+
+/* 説明 */
+
+.result-message {
+
+    font-size: 18px;
+
+    color: #ccc;
+
+}
+
+
+/* 正常 */
+
+.success {
+
+    border-color: #00c853 !important;
+
+}
+
+
+.success .result-title {
+
+    color: #00c853;
+
+}
+
+
+/* 注意 */
+
+.warning {
+
+    border-color: #ff9800 !important;
+
+}
+
+
+.warning .result-title {
+
+    color: #ff9800;
+
+}
+
+
+/* 危険 */
+
+.danger {
+
+    border-color: #e53935 !important;
+
+}
+
+
+.danger .result-title {
+
+    color: #e53935;
+
+}
+
+
+/* エラー */
+
+.error {
+
+    border-color: #e53935 !important;
+
+}
+
+
+.error .result-title {
+
+    color: #e53935;
+
+}
+
+
+/* 次のQR */
+
+#retryBtn {
+
+    display: none;
+
+    background: #2196f3;
+
+    color: white;
+
+}
+
+
+/* スマホ */
+
+@media (max-width: 600px) {
+
+    header h1 {
+
+        font-size: 32px;
+
+    }
+
+    .ticket-number {
+
+        font-size: 48px;
+
+    }
+
+    .result-title {
+
+        font-size: 28px;
+
+    }
+
+}
