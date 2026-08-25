@@ -2,6 +2,7 @@
 <html lang="ja">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -17,48 +18,28 @@
 
 </head>
 
+
 <body>
 
     <header>
 
         <h1>受付</h1>
 
-        <p>整理券のQRコードを読み取ってください</p>
+        <p>
+            整理券のQRコードを読み取ってください
+        </p>
 
     </header>
 
 
     <main>
 
-        <!-- 日付選択 -->
 
-        <div id="daySelect">
+        <!-- 現在の日付 -->
 
-            <label>
+        <div id="currentDay">
 
-                <input
-                    type="radio"
-                    name="day"
-                    value="tickets_day1"
-                    checked
-                >
-
-                1日目
-
-            </label>
-
-
-            <label>
-
-                <input
-                    type="radio"
-                    name="day"
-                    value="tickets_day2"
-                >
-
-                2日目
-
-            </label>
+            読み込み中...
 
         </div>
 
@@ -66,7 +47,9 @@
         <!-- スキャン開始 -->
 
         <button id="startBtn">
+
             QRスキャン開始
+
         </button>
 
 
@@ -78,7 +61,9 @@
         <!-- カメラ停止 -->
 
         <button id="stopBtn">
+
             カメラを閉じる
+
         </button>
 
 
@@ -90,8 +75,11 @@
         <!-- 再スキャン -->
 
         <button id="retryBtn">
+
             次の整理券を読み取る
+
         </button>
+
 
     </main>
 

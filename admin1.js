@@ -3,7 +3,8 @@ import { db } from "./firebase.js";
 import {
     doc,
     getDoc,
-    updateDoc
+    updateDoc,
+    onSnapshot
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 
@@ -26,10 +27,8 @@ const result =
 const retryBtn =
     document.getElementById("retryBtn");
 
-const dayRadios =
-    document.querySelectorAll(
-        'input[name="day"]'
-    );
+const currentDay =
+    document.getElementById("currentDay");
 
 
 // ========================================
@@ -47,22 +46,110 @@ let processing = false;
 
 
 // ========================================
-// 日付変更
+// Firebaseの現在日付を監視
 // ========================================
 
-dayRadios.forEach(radio => {
-
-    radio.addEventListener(
-        "change",
-        () => {
-
-            collectionName =
-                radio.value;
-
-        }
+const systemRef =
+    doc(
+        db,
+        "settings",
+        "system"
     );
 
-});
+
+onSnapshot(
+
+    systemRef,
+
+    snapshot => {
+
+        // settings/systemがない場合
+
+        if (!snapshot.exists()) {
+
+            console.error(
+                "settings/system が見つかりません"
+            );
+
+            currentDay.textContent =
+                "日付設定がありません";
+
+            return;
+
+        }
+
+
+        const data =
+            snapshot.data();
+
+
+        const activeDay =
+            data.activeDay;
+
+
+        // ====================================
+        // 日付チェック
+        // ====================================
+
+        if (
+            activeDay !== "tickets_day1" &&
+            activeDay !== "tickets_day2"
+        ) {
+
+            console.error(
+                "activeDayの値が正しくありません"
+            );
+
+            currentDay.textContent =
+                "日付設定エラー";
+
+            return;
+
+        }
+
+
+        // ====================================
+        // 使用するコレクション変更
+        // ====================================
+
+        collectionName =
+            activeDay;
+
+
+        // ====================================
+        // 現在の日付表示
+        // ====================================
+
+        currentDay.textContent =
+
+            activeDay === "tickets_day1"
+
+                ? "現在：1日目"
+
+                : "現在：2日目";
+
+
+        console.log(
+            "現在の日付:",
+            activeDay
+        );
+
+    },
+
+    error => {
+
+        console.error(
+            "日付監視エラー:",
+            error
+        );
+
+
+        currentDay.textContent =
+            "日付を取得できません";
+
+    }
+
+);
 
 
 // ========================================
@@ -83,20 +170,36 @@ startBtn.onclick = () => {
 async function startScanner() {
 
     if (scanning) {
+
         return;
+
     }
+
 
     processing = false;
 
-    result.style.display = "none";
 
-    retryBtn.style.display = "none";
+    result.style.display =
+        "none";
 
-    startBtn.style.display = "none";
+    result.innerHTML =
+        "";
 
-    stopBtn.style.display = "block";
 
-    reader.style.display = "block";
+    retryBtn.style.display =
+        "none";
+
+
+    startBtn.style.display =
+        "none";
+
+
+    stopBtn.style.display =
+        "block";
+
+
+    reader.style.display =
+        "block";
 
 
     scanner =
@@ -111,16 +214,21 @@ async function startScanner() {
         await scanner.start(
 
             {
-                facingMode: "environment"
+                facingMode:
+                    "environment"
             },
 
             {
                 fps: 10,
 
                 qrbox: {
+
                     width: 250,
+
                     height: 250
+
                 }
+
             },
 
             scanSuccess,
@@ -135,18 +243,30 @@ async function startScanner() {
 
         console.error(error);
 
+
         scanning = false;
 
-        reader.style.display = "none";
 
-        stopBtn.style.display = "none";
+        reader.style.display =
+            "none";
 
-        startBtn.style.display = "block";
+
+        stopBtn.style.display =
+            "none";
+
+
+        startBtn.style.display =
+            "block";
+
 
         showResult(
+
             "error",
+
             "カメラエラー",
+
             "カメラを起動できませんでした。"
+
         );
 
     }
@@ -160,15 +280,21 @@ async function startScanner() {
 
 async function scanSuccess(text) {
 
-    if (!scanning || processing) {
+    if (
+        !scanning ||
+        processing
+    ) {
+
         return;
+
     }
 
 
     processing = true;
 
 
-    // QRを読み取った瞬間にカメラ停止
+    // QRを読み取った瞬間に
+    // カメラ停止
 
     await stopScanner();
 
@@ -177,7 +303,7 @@ async function scanSuccess(text) {
         text.trim();
 
 
-    // 即処理
+    // チケット処理
 
     await processTicket(ticketId);
 
@@ -204,9 +330,9 @@ async function processTicket(ticketId) {
             await getDoc(ticketRef);
 
 
-        // ==============================
+        // ====================================
         // 存在しない
-        // ==============================
+        // ====================================
 
         if (!snap.exists()) {
 
@@ -233,11 +359,13 @@ async function processTicket(ticketId) {
             data.number ?? ticketId;
 
 
-        // ==============================
+        // ====================================
         // 受付前
-        // ==============================
+        // ====================================
 
-        if (data.status === "waiting") {
+        if (
+            data.status === "waiting"
+        ) {
 
             await updateDoc(
 
@@ -268,11 +396,13 @@ async function processTicket(ticketId) {
         }
 
 
-        // ==============================
+        // ====================================
         // 受付済み
-        // ==============================
+        // ====================================
 
-        if (data.status === "accepted") {
+        if (
+            data.status === "accepted"
+        ) {
 
             showResult(
 
@@ -292,11 +422,13 @@ async function processTicket(ticketId) {
         }
 
 
-        // ==============================
+        // ====================================
         // 入場済み
-        // ==============================
+        // ====================================
 
-        if (data.status === "entered") {
+        if (
+            data.status === "entered"
+        ) {
 
             showResult(
 
@@ -316,9 +448,9 @@ async function processTicket(ticketId) {
         }
 
 
-        // ==============================
-        // 不明な状態
-        // ==============================
+        // ====================================
+        // 不明
+        // ====================================
 
         showResult(
 
@@ -337,6 +469,7 @@ async function processTicket(ticketId) {
     catch (error) {
 
         console.error(error);
+
 
         showResult(
 
@@ -364,9 +497,12 @@ function showResult(
     number = null
 ) {
 
-    result.className = type;
+    result.className =
+        type;
 
-    result.style.display = "block";
+
+    result.style.display =
+        "block";
 
 
     let html = "";
@@ -377,7 +513,9 @@ function showResult(
         html += `
 
             <div class="ticket-number">
+
                 No.${number}
+
             </div>
 
         `;
@@ -388,20 +526,27 @@ function showResult(
     html += `
 
         <div class="result-title">
+
             ${title}
+
         </div>
 
+
         <div class="result-message">
+
             ${message}
+
         </div>
 
     `;
 
 
-    result.innerHTML = html;
+    result.innerHTML =
+        html;
 
 
-    retryBtn.style.display = "block";
+    retryBtn.style.display =
+        "block";
 
 }
 
@@ -422,7 +567,10 @@ async function stopScanner() {
 
         catch (error) {
 
-            console.log(error);
+            console.log(
+                "scanner.stop error:",
+                error
+            );
 
         }
 
@@ -435,7 +583,10 @@ async function stopScanner() {
 
         catch (error) {
 
-            console.log(error);
+            console.log(
+                "scanner.clear error:",
+                error
+            );
 
         }
 
@@ -447,9 +598,13 @@ async function stopScanner() {
 
     scanning = false;
 
-    reader.style.display = "none";
 
-    stopBtn.style.display = "none";
+    reader.style.display =
+        "none";
+
+
+    stopBtn.style.display =
+        "none";
 
 }
 
@@ -458,17 +613,31 @@ async function stopScanner() {
 // カメラ閉じる
 // ========================================
 
-stopBtn.onclick = async () => {
+stopBtn.onclick =
+    async () => {
 
-    await stopScanner();
+        await stopScanner();
 
-    result.style.display = "none";
 
-    retryBtn.style.display = "none";
+        result.style.display =
+            "none";
 
-    startBtn.style.display = "block";
 
-};
+        result.innerHTML =
+            "";
+
+
+        retryBtn.style.display =
+            "none";
+
+
+        startBtn.style.display =
+            "block";
+
+
+        processing = false;
+
+    };
 
 
 // ========================================
@@ -477,11 +646,20 @@ stopBtn.onclick = async () => {
 
 retryBtn.onclick = () => {
 
-    result.style.display = "none";
+    result.style.display =
+        "none";
 
-    retryBtn.style.display = "none";
+
+    result.innerHTML =
+        "";
+
+
+    retryBtn.style.display =
+        "none";
+
 
     processing = false;
+
 
     startScanner();
 
