@@ -353,12 +353,20 @@ button:hover {
 }
 
 #currentDay {
+    width: 180px;
+    margin: 0 auto 20px;
+
     text-align: center;
+
     background: #1d1d1d;
+
     border: 1px solid #333;
+
     border-radius: 15px;
-    padding: 15px;
-    margin-bottom: 20px;
+
+    padding: 12px 15px;
+
     font-size: 20px;
+
     font-weight: bold;
 }
