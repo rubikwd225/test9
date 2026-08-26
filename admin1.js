@@ -9,7 +9,7 @@ import {
 
 
 // ========================================
-// HTML
+// HTML要素
 // ========================================
 
 const startBtn =
@@ -27,9 +27,6 @@ const result =
 const retryBtn =
     document.getElementById("retryBtn");
 
-const currentDay =
-    document.getElementById("currentDay");
-
 
 // ========================================
 // 変数
@@ -44,9 +41,12 @@ let scanning = false;
 
 let processing = false;
 
+let unsubscribeDay = null;
+
 
 // ========================================
-// Firebaseの現在日付を監視
+// Firebase
+// settings / system
 // ========================================
 
 const systemRef =
@@ -57,99 +57,94 @@ const systemRef =
     );
 
 
-onSnapshot(
+// ========================================
+// 日付をFirebaseから取得
+// ========================================
 
-    systemRef,
+function startDayListener() {
 
-    snapshot => {
+    if (unsubscribeDay) {
 
-        // settings/systemがない場合
+        unsubscribeDay();
 
-        if (!snapshot.exists()) {
-
-            console.error(
-                "settings/system が見つかりません"
-            );
-
-            currentDay.textContent =
-                "日付設定がありません";
-
-            return;
-
-        }
-
-
-        const data =
-            snapshot.data();
-
-
-        const activeDay =
-            data.activeDay;
-
-
-        // ====================================
-        // 日付チェック
-        // ====================================
-
-        if (
-            activeDay !== "tickets_day1" &&
-            activeDay !== "tickets_day2"
-        ) {
-
-            console.error(
-                "activeDayの値が正しくありません"
-            );
-
-            currentDay.textContent =
-                "日付設定エラー";
-
-            return;
-
-        }
-
-
-        // ====================================
-        // 使用するコレクション変更
-        // ====================================
-
-        collectionName =
-            activeDay;
-
-
-        // ====================================
-        // 現在の日付表示
-        // ====================================
-
-        currentDay.textContent =
-
-            activeDay === "tickets_day1"
-
-                ? "現在：1日目"
-
-                : "現在：2日目";
-
-
-        console.log(
-            "現在の日付:",
-            activeDay
-        );
-
-    },
-
-    error => {
-
-        console.error(
-            "日付監視エラー:",
-            error
-        );
-
-
-        currentDay.textContent =
-            "日付を取得できません";
+        unsubscribeDay = null;
 
     }
 
-);
+
+    unsubscribeDay =
+        onSnapshot(
+
+            systemRef,
+
+            snapshot => {
+
+                if (!snapshot.exists()) {
+
+                    console.error(
+                        "settings/system が存在しません"
+                    );
+
+                    return;
+
+                }
+
+
+                const data =
+                    snapshot.data();
+
+
+                const activeDay =
+                    data.activeDay;
+
+
+                if (
+                    activeDay !== "tickets_day1" &&
+                    activeDay !== "tickets_day2"
+                ) {
+
+                    console.error(
+                        "activeDayが不正です:",
+                        activeDay
+                    );
+
+                    return;
+
+                }
+
+
+                // Firebaseの日付を使用
+
+                collectionName =
+                    activeDay;
+
+
+                console.log(
+                    "現在の日付:",
+                    collectionName
+                );
+
+            },
+
+            error => {
+
+                console.error(
+                    "日付の取得に失敗しました:",
+                    error
+                );
+
+            }
+
+        );
+
+}
+
+
+// ========================================
+// 日付監視開始
+// ========================================
+
+startDayListener();
 
 
 // ========================================
@@ -222,11 +217,8 @@ async function startScanner() {
                 fps: 10,
 
                 qrbox: {
-
                     width: 250,
-
                     height: 250
-
                 }
 
             },
@@ -293,8 +285,7 @@ async function scanSuccess(text) {
     processing = true;
 
 
-    // QRを読み取った瞬間に
-    // カメラ停止
+    // 読み取った瞬間にカメラ停止
 
     await stopScanner();
 
@@ -302,8 +293,6 @@ async function scanSuccess(text) {
     const ticketId =
         text.trim();
 
-
-    // チケット処理
 
     await processTicket(ticketId);
 
@@ -356,7 +345,33 @@ async function processTicket(ticketId) {
 
 
         const number =
-            data.number ?? ticketId;
+            data.number ??
+            ticketId;
+
+
+        // ====================================
+        // 無効
+        // ====================================
+
+        if (
+            data.status === "invalid"
+        ) {
+
+            showResult(
+
+                "danger",
+
+                "無効な整理券",
+
+                `No.${number} は無効になっています。`,
+
+                number
+
+            );
+
+            return;
+
+        }
 
 
         // ====================================
@@ -372,7 +387,8 @@ async function processTicket(ticketId) {
                 ticketRef,
 
                 {
-                    status: "accepted"
+                    status:
+                        "accepted"
                 }
 
             );
@@ -389,7 +405,6 @@ async function processTicket(ticketId) {
                 number
 
             );
-
 
             return;
 
@@ -416,7 +431,6 @@ async function processTicket(ticketId) {
 
             );
 
-
             return;
 
         }
@@ -441,7 +455,6 @@ async function processTicket(ticketId) {
                 number
 
             );
-
 
             return;
 
